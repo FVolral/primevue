@@ -1,6 +1,17 @@
 <template>
-    <div :class="cx('root')" @click="onBarClick" v-bind="ptm('root')" :data-p-sliding="false" data-pc-name="slider">
-        <span :class="cx('range')" :style="[sx('range'), rangeStyle]" v-bind="ptm('range')"></span>
+    <div
+        :class="cx('root')"
+        @click="onBarClick"
+        v-bind="ptm('root')"
+        :data-p-sliding="false"
+        data-pc-name="slider"
+        :style="{ background: `linear-gradient(0.25turn, ${startColor}, ${endColor}) !important` }"
+    >
+        <span
+            :class="cx('range')"
+            :style="[sx('range'), rangeStyle, { background: `linear-gradient(0.25turn, ${startColor}, ${endColor}) !important`  }]"
+            v-bind="ptm('range')"
+        ></span>
         <span
             v-if="!range"
             :class="cx('handle')"
@@ -9,7 +20,8 @@
             @touchmove="onDrag($event)"
             @touchend="onDragEnd($event)"
             @mousedown="onMouseDown($event)"
-            @keydown="onKeyDown($event)" 
+            @keydown="onKeyDown($event)"
+            @dblclick="resetToDefault($event)"
             :tabindex="tabindex"
             role="slider"
             :aria-valuemin="min"
@@ -29,6 +41,8 @@
             @touchend="onDragEnd($event)"
             @mousedown="onMouseDown($event, 0)"
             @keydown="onKeyDown($event, 0)"
+            @keyup="onKeyUp()"
+            @dblclick="resetToDefault($event, 0)"
             :tabindex="tabindex"
             role="slider"
             :aria-valuemin="min"
@@ -49,6 +63,7 @@
             @mousedown="onMouseDown($event, 1)"
             @keydown="onKeyDown($event, 1)"
             @keyup="onKeyUp()"
+            @dblclick="resetToDefault($event, 0)"
             :tabindex="tabindex"
             role="slider"
             :aria-valuemin="min"
@@ -94,11 +109,18 @@ export default {
     },
     mounted() {
         this.bindModifierKeyPressedListeners();
+
         if (this.fineTunable && this.fineTunableFactor > 1) {
             console.warning(`The 'fineTunableFactor' value set on the slider is greater than one. Please ensure the value is between 0 and 1 for proper functionality.`)
         }
     },
     methods: {
+        resetToDefault () {
+            if (this.defaultValue !== null) {
+                console.log(`this.defaultValue: ${this.defaultValue}`)
+                this.updateModel(event, this.defaultValue);
+            }
+        },
         updateDomData() {
             let rect = this.$el.getBoundingClientRect();
 
@@ -115,8 +137,13 @@ export default {
             if (step === null) {
                 step = 1.0
             }
+
             if (fineTuneFactor === null || !modifierKeyPressed) {
                 fineTuneFactor = 1.0
+            }
+
+            if (fineTuneFactor < 1.0 && this.superModifierKeyPressed) {
+                fineTuneFactor *= 0.1
             }
 
             const SliderRange = max - min
@@ -128,10 +155,11 @@ export default {
 
             if (orientation === 'horizontal') {
                 const cursorPositionInPixelX = dragStartX - initX
-                normValue = (cursorPositionInPixelX) / barWidth
-                startDragRealValue = min + normValue * SliderRange
-                delta = (pageX - dragStartX)
 
+                normValue = cursorPositionInPixelX / barWidth
+                startDragRealValue = min + normValue * SliderRange
+                delta = pageX - dragStartX
+                console.log(`delta: ${delta}`)
                 value = startDragRealValue + (delta / barWidth ) * SliderRange * fineTuneFactor
             } else {
                 normValue = (dragStartY - initY) / barHeight
@@ -140,16 +168,18 @@ export default {
 
                 value = startDragRealValue + (delta / barHeight ) * SliderRange * fineTuneFactor
             }
- 
+
             if (fineTunable) {
                 value = this.clamp(value, min, max)
+
                 return value
             }
 
             const divValue = value / step
+
             value = Math.round(divValue) * step
-            
             value = this.clamp(value, min, max)
+
             return value
         },
         setValue(event) {
@@ -207,7 +237,7 @@ export default {
         onDragStart(event, index) {
             this.dragStartX = event.touches ? event.touches[0].pageX : event.pageX;
             this.dragStartY = event.touches ? event.touches[0].pageY : event.pageY;
-            
+
             if (this.disabled) {
                 return;
             }
@@ -256,6 +286,17 @@ export default {
         },
         onModifierKeyDown (event, index) {
             switch (event.code) {
+                case 'ShiftLeft':
+                    if (!this.superModifierKeyPressed && this.dragging) {
+                        this.superModifierKeyPressed = true;
+                        // this.dragStartX = this.currentDragX
+                        // this.dragStartY = this.currentDragY
+                    }
+
+                    event.preventDefault();
+                    this.bindDragListeners();
+
+                    break
                 case 'ControlLeft':
                     if (!this.modifierKeyPressed && this.dragging) {
                         this.modifierKeyPressed = true;
@@ -264,7 +305,7 @@ export default {
                         this.dragStartX = this.currentDragX
                         this.dragStartY = this.currentDragY
                     }
-                    
+
                     event.preventDefault();
                     this.bindDragListeners();
                     break;
@@ -317,6 +358,14 @@ export default {
             if (e.code === 'ControlLeft') {
                 if (this.modifierKeyPressed) {
                     this.modifierKeyPressed = false
+                    this.dragStartX = this.currentDragX
+                    this.dragStartY = this.currentDragY
+                }
+            }
+
+            if (e.code === 'ShiftLeft') {
+                if (this.superModifierKeyPressed) {
+                    this.superModifierKeyPressed = false
                 }
             }
         },
@@ -394,17 +443,6 @@ export default {
         }
     },
     computed: {
-        stepWithFineTune () {
-            if (!this.fineTunable) {
-                return this.step
-            }
-
-            if (!this.modifierKeyPressed) {
-                return this.step
-            }
-
-            return this.step * this.fineTuneFactor
-        },
         horizontal() {
             return this.orientation === 'horizontal';
         },

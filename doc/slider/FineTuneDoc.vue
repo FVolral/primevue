@@ -5,11 +5,14 @@
     <div class="card flex justify-content-center">
         <div class="w-14rem">
             <InputText v-model.number="value" class="w-full" />
-            <Slider 
+            <Slider
                 v-model="value"
                 :step="1"
                 :min="-8"
                 :max="8"
+                :defaultValue="0"
+                startColor="#FF0000"
+                endColor="#FFFF00"
                 fineTunable
                 :fineTuneFactor=".01"
                 class="w-14rem"

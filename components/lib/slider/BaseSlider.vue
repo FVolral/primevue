@@ -75,6 +75,18 @@ export default {
             type: Number,
             default: 100
         },
+        defaultValue: {
+            type: Number,
+            default: null
+        },
+        startColor: {
+            type: String,
+            default: '#3B82F6'
+        },
+        endColor: {
+            type: String,
+            default: '#3B82F6'
+        },
         orientation: {
             type: String,
             default: 'horizontal'
