@@ -117,7 +117,6 @@ export default {
     methods: {
         resetToDefault () {
             if (this.defaultValue !== null) {
-                console.log(`this.defaultValue: ${this.defaultValue}`)
                 this.updateModel(event, this.defaultValue);
             }
         },
@@ -159,7 +158,6 @@ export default {
                 normValue = cursorPositionInPixelX / barWidth
                 startDragRealValue = min + normValue * SliderRange
                 delta = pageX - dragStartX
-                console.log(`delta: ${delta}`)
                 value = startDragRealValue + (delta / barWidth ) * SliderRange * fineTuneFactor
             } else {
                 normValue = (dragStartY - initY) / barHeight
