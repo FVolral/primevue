@@ -1,15 +1,16 @@
 <template>
     <div
-        :class="cx('root')"
+        :class="[cx('root'), {'is-hue-slider': isHueSlider}]"
         @click="onBarClick"
         v-bind="ptm('root')"
         :data-p-sliding="false"
         data-pc-name="slider"
-        :style="{ background: `linear-gradient(0.25turn, ${startColor}, ${endColor}) !important` }"
+        :style="{ background: backgroundColor }"
     >
+
         <span
-            :class="cx('range')"
-            :style="[sx('range'), rangeStyle, { background: `linear-gradient(0.25turn, ${startColor}, ${endColor}) !important`  }]"
+            :class="[cx('root'), {'is-hue-slider': isHueSlider}]"
+            :style="[sx('range'), rangeStyle, { background: backgroundColor  }]"
             v-bind="ptm('range')"
         ></span>
         <span
@@ -441,6 +442,17 @@ export default {
         }
     },
     computed: {
+        backgroundColor () {
+            if (this.isHueSlider) {
+                return 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)'
+            }
+
+            if (this.startColor && this.endColor) {
+                return `linear-gradient(0.25turn, ${this.startColor}, ${this.endColor}) !important`
+            }
+
+            return 'inherit'
+        },
         horizontal() {
             return this.orientation === 'horizontal';
         },
@@ -455,6 +467,7 @@ export default {
                 if (this.horizontal) return { left: rangeSliderPosition + '%', width: rangeSliderWidth + '%' };
                 else return { bottom: rangeSliderPosition + '%', height: rangeSliderWidth + '%' };
             } else {
+                if (this.isHueSlider) return { width: '100%' } 
                 if (this.horizontal) return { width: this.handlePosition + '%' };
                 else return { height: this.handlePosition + '%' };
             }

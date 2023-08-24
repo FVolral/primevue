@@ -8,8 +8,9 @@ import BasicDoc from '@/doc/slider/BasicDoc';
 import ImportDoc from '@/doc/slider/ImportDoc';
 import InputDoc from '@/doc/slider/InputDoc';
 import RangeDoc from '@/doc/slider/RangeDoc';
-import StepDoc from '@/doc/slider/StepDoc'; 
-import FineTuneDoc from '@/doc/slider/FineTuneDoc'; 
+import StepDoc from '@/doc/slider/StepDoc';
+import FineTuneDoc from '@/doc/slider/FineTuneDoc';
+import ColorDoc from '@/doc/slider/ColorDoc';
 import StyleDoc from '@/doc/slider/StyleDoc';
 import VerticalDoc from '@/doc/slider/VerticalDoc';
 import PTComponent from '@/doc/slider/pt/index.vue';
@@ -37,6 +38,11 @@ export default {
                     id: 'step',
                     label: 'Step',
                     component: StepDoc
+                },
+                {
+                    id: 'color',
+                    label: 'Color',
+                    component: ColorDoc
                 },
                 {
                     id: 'finetune',

@@ -87,6 +87,10 @@ export default {
             type: String,
             default: '#3B82F6'
         },
+        isHueSlider: {
+            type: Boolean,
+            default: false
+        },
         orientation: {
             type: String,
             default: 'horizontal'
